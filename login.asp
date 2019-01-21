@@ -4,7 +4,8 @@ Dim acc
 Dim salida
 Dim ok
 Dim oConn
-Dim oRs 
+Dim oRs
+Dim oCmd
 Dim username
 Dim password
 Dim sql
@@ -24,11 +25,11 @@ Function login()
   On Error Resume Next
   
   login = false
-  stop
-  Set oConn = Server.CreateObject("ADODB.Connection")
-  Set oRs = Server.CreateObject("ADODB.Recordset")
 
-  oConn.Open "Data Source=PON-PC;Initial Catalog=TestDB;Integrated Security=True"
+  Set oConn = Server.CreateObject("ADODB.Connection")
+
+  oConn.ConnectionString = "Provider=SQLNCLI11;Server=.\SQLEXPRESS;Database=TestDB;Integrated Security=SSPI;DataTypeCompatibility=80;"
+  oConn.Open
 
   If username = "" Or password = "" Then
     salida = "Error de transmisión de datos"
@@ -36,15 +37,23 @@ Function login()
     sql = "SELECT Id FROM Usuarios "
     sql = sql + "WHERE UserName = '" + username + "' "
     sql = sql + "AND Password = '" + password + "';"
+    
+    Set oCmd = Server.CreateObject("ADODB.Command")
+    Set oCmd.ActiveConnection = oConn
+    oCmd.CommandText = sql
 
-    oRs.Open sql, oConn
-    oRs.Execute
+    'Set oRs = Server.CreateObject("ADODB.Recordset")
+    Set oRs = oCmd.Execute
+    
+    'oRs.Open
     
     If oRs.EOF = False Then
       If CInt(oRs.Fields("Id")) <> 0 Then
         'Todo Ok. Loggear
         login = True
       End If
+    Else
+      salida = "El nombre de usuario y contrase�a no coinciden."
     End If
   End If
 
