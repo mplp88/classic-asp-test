@@ -32,7 +32,7 @@ Function login()
   oConn.Open
 
   If username = "" Or password = "" Then
-    salida = "Error de transmisiÃ³n de datos"
+    salida = "Error de transmisión de datos"
   Else 
     sql = "SELECT Id FROM Usuarios "
     sql = sql + "WHERE UserName = '" + username + "' "
@@ -42,10 +42,9 @@ Function login()
     Set oCmd.ActiveConnection = oConn
     oCmd.CommandText = sql
 
-    'Set oRs = Server.CreateObject("ADODB.Recordset")
     Set oRs = oCmd.Execute
     
-    'oRs.Open
+    
     
     If oRs.EOF = False Then
       If CInt(oRs.Fields("Id")) <> 0 Then
@@ -53,7 +52,7 @@ Function login()
         login = True
       End If
     Else
-      salida = "El nombre de usuario y contraseï¿½a no coinciden."
+      salida = "El nombre de usuario y contraseña no coinciden."
     End If
   End If
 
