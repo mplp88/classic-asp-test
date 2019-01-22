@@ -42,9 +42,8 @@ Function login()
     Set oCmd.ActiveConnection = oConn
     oCmd.CommandText = sql
 
+    Set oRs = Server.CreateObject("ADODB.Recordset")
     Set oRs = oCmd.Execute
-    
-    
     
     If oRs.EOF = False Then
       If CInt(oRs.Fields("Id")) <> 0 Then
