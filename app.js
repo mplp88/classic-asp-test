@@ -51,7 +51,7 @@ $(document).ready(function () {
         }
         this.message += '</ul>';
 
-        return ret; 
+        return ret;
       }
     }
   })
