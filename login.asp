@@ -1,11 +1,11 @@
-<!--#include virtual="default.html"-->
+<!--#include virtual="./default.asp"-->
+<!--#include virtual="./DAL/connection.asp"-->
 <%
 Dim acc
 Dim salida
+Dim alertLevel
 Dim ok
-Dim oConn
 Dim oRs
-Dim oCmd
 Dim username
 Dim password
 Dim sql
@@ -13,62 +13,64 @@ Dim sql
 username = Request.Form("username")
 password = Request.Form("password")
 
+alertLevel = "warning"
+
 ok = true
 
-If login = false Then
-    ok = false
+If login = False Then
+    ok = False
 Else
-  Response.Redirect "./index.html"
+  Response.Redirect "./index.asp"
 End If
 
 Function login() 
   On Error Resume Next
   
-  login = false
-
-  Set oConn = Server.CreateObject("ADODB.Connection")
-
-  oConn.ConnectionString = "Provider=SQLNCLI11;Server=.\SQLEXPRESS;Database=TestDB;Integrated Security=SSPI;DataTypeCompatibility=80;"
-  oConn.Open
-
+  login = False
+  
   If username = "" Or password = "" Then
-    salida = "Error de transmisión de datos"
+    salida = "Todos los campos son requeridos"
   Else 
-    sql = "SELECT Id FROM Usuarios "
+    sql = "SELECT Id, UserName, Password FROM Usuarios "
     sql = sql + "WHERE UserName = '" + username + "' "
-    sql = sql + "AND Password = '" + password + "';"
-    
-    Set oCmd = Server.CreateObject("ADODB.Command")
-    Set oCmd.ActiveConnection = oConn
-    oCmd.CommandText = sql
 
     Set oRs = Server.CreateObject("ADODB.Recordset")
-    Set oRs = oCmd.Execute
     
-    If oRs.EOF = False Then
-      If CInt(oRs.Fields("Id")) <> 0 Then
-        'Todo Ok. Loggear
-        login = True
-      End If
+    salida = "El nombre de usuario y contraseÃ±a no coinciden."
+
+    If executeQuery(sql, oRs, salida) = False Then
+      salida = Replace(salida, "'", "\'")
+      salida = "Error ingresando al Sistema. \n ("+salida+")."
     Else
-      salida = "El nombre de usuario y contraseña no coinciden."
+      While oRs.EOF = False
+        If oRs.Fields("Password") = password Then
+          login = True
+          Session("UserName") = oRs.Fields("UserName")
+          Session("UserId") = oRs.Fields("Id")
+        Else
+        End If
+
+        oRs.MoveNext
+      Wend
     End If
   End If
-
+  
   If Err.Number <> 0 Then
     salida = Err.Description
-    login = false
+    alertLevel = "error"
+    login = False
   End If
 
-  Set oConn = Nothing
   Set oRs = Nothing
 End Function
 %>
 
 <script>
   <%
-    If ok = false Then
-      Response.Write "loginFailed('"+salida+"');"
+    If ok Then
+      Response.Write "loginSuccess();"
+    Else
+      Response.Write "loginFailed('"+salida+"', '"+ alertLevel +"');"
     End If
   %>
 </script>
